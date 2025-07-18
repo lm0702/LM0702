@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D Rotating Card</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background-color: #000;
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Remove all focus outlines */
+    a, button {
+      outline: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+    }
+
+    /* Gorgeous Shining Stars */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+    
+    .star {
+      position: absolute;
+      background-color: #fff;
+      border-radius: 50%;
+      animation: twinkle 4s infinite ease-in-out;
+      opacity: 0;
+      will-change: transform, opacity, box-shadow;
+      box-shadow: 0 0 15px 3px rgba(100, 255, 255, 0.8);
+    }
+    
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.1; transform: scale(0.7); }
+      50% { opacity: 1; transform: scale(1.3); box-shadow: 0 0 20px 5px rgba(100, 255, 255, 1); }
+    }
+
+    .heading {
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      text-align: center;
+      text-shadow: 0 0 10px rgba(100, 200, 255, 0.7);
+    }
+
+    /* Elegant Glowing Bars */
+    .top-bar, .footer-line {
+      width: 80%;
+      max-width: 400px;
+      height: 2px;
+      background: linear-gradient(90deg, 
+        transparent,
+        rgba(100, 200, 255, 0.9),
+        transparent);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(100, 200, 255, 0.4);
+      margin-bottom: 30px;
+    }
+
+    .footer-line {
+      margin: 30px 0 20px 0;
+    }
+
+    /* Stunning Card Design */
+    .card-container {
+      perspective: 1200px;
+      width: 320px;
+      height: 480px;
+      margin: 20px 0;
+      touch-action: none;
+      cursor: grab;
+      position: relative;
+    }
+    
+    .card-container:active {
+      cursor: grabbing;
+    }
+
+    .card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.05s linear;
+      will-change: transform;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(100, 200, 255, 0.6);
+      border: 1px solid rgba(100, 200, 255, 0.4);
+    }
+
+    .card .side {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .card .front {
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      gap: 25px;
+      opacity: 1 !important;
+    }
+
+    /* Porsche Image Background */
+    .card .back {
+      background: url('Porsche.jpg') no-repeat center center;
+      background-size: cover;
+      transform: rotateY(180deg);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Glow overlay */
+    .card .back::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 1;
+    }
+
+    /* Subtle shine effect */
+    .card .back::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        to bottom right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0) 45%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0) 55%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      transform: rotate(30deg);
+      animation: shine 5s infinite;
+      z-index: 2;
+    }
+
+    @keyframes shine {
+      0% { top: -50%; left: -50%; }
+      100% { top: 150%; left: 150%; }
+    }
+
+    .card .front .circle-img {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: #333;
+      box-shadow: 0 0 20px rgba(100, 200, 255, 0.4);
+      margin-bottom: 10px;
+    }
+
+    .card .front .content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .card .front h3 {
+      font-size: 1.5rem;
+      color: #64c8ff;
+      text-shadow: 0 0 8px rgba(100, 200, 255, 0.5);
+    }
+
+    .card .front p {
+      text-align: center;
+      font-size: 1rem;
+      line-height: 1.5;
+      color: #ddd;
+      padding: 0 10px;
+    }
+
+    /* Beautiful Social Icons */
+    .social-icons {
+      display: flex;
+      gap: 25px;
+      margin-top: 20px;
+    }
+
+    .social-icons a {
+      color: white;
+      font-size: 1.5rem;
+      transition: all 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
+      text-shadow: 0 0 5px rgba(100, 200, 255, 0.5);
+    }
+
+    .social-icons a:hover {
+      color: #64c8ff;
+      transform: scale(1.3);
+      text-shadow: 0 0 15px rgba(100, 200, 255, 0.9);
+    }
+
+    /* Animated Next Page Button */
+    .next-page-btn {
+      margin: 20px 0;
+      padding: 12px 30px;
+      background: rgba(100, 200, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(100, 200, 255, 0.5);
+      border-radius: 30px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      text-align: center;
+      display: inline-block;
+      outline: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      /* Animation properties */
+      animation: pulse 2s infinite;
+      box-shadow: 0 0 0 0 rgba(100, 200, 255, 0.7);
+    }
+
+    /* Pulse animation */
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(100, 200, 255, 0.7);
+      }
+      70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(100, 200, 255, 0);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(100, 200, 255, 0);
+      }
+    }
+
+    .next-page-btn:hover {
+      animation: none;
+      background: rgba(100, 200, 255, 0.4);
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(100, 200, 255, 0.6);
+    }
+
+    /* Professional Footer */
+    .footer-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: auto;
+      padding: 20px 0;
+    }
+
+    .copyright {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #aaa;
+      text-align: center;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 1px;
+    }
+
+    @media (max-width: 600px) {
+      .card-container {
+        width: 280px;
+        height: 420px;
+      }
+      .heading {
+        font-size: 1.8rem;
+      }
+      .next-page-btn {
+        padding: 10px 25px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+  
+  <!-- Heading above the top bar -->
+  <div class="heading">LM0702</div>
+  <div class="top-bar"></div>
+  
+  <div class="card-container" id="container">
+    <div class="card" id="card">
+      <div class="side front">
+        <img src="Profile.png" class="circle-img" alt="Profile Picture">
+        <div class="content">
+          <h3>Муниб</h3>
+          <p>الصمتُ وقار، والإخلاصُ سُلطان — هذا هو مُنيب</p>
+        </div>
+        <div class="social-icons">
+          <a href="https://www.instagram.com/lm0702_?igsh=MWxlMXkxOHB6dnQwaA==" target="_blank"><i class="fab fa-instagram"></i></a>
+          <a href="https://www.tiktok.com/@0702lm_?_t=ZS-8y8iB1SCVZH&_r=1" target="_blank"><i class="fab fa-tiktok"></i></a>
+        </div>
+      </div>
+      <div class="side back"></div>
+    </div>
+  </div>
+
+  <div class="footer-container">
+    <div class="footer-line"></div>
+    <a href="https://lm0702.github.io/-/" class="next-page-btn" id="nextPageBtn" target="_blank">Next Page</a>
+    <div class="copyright">  © 2025 All rights reserved. Designed by Мунеб</div>
+  </div>
+
+  <script>
+    // Create dazzling stars
+    const starsContainer = document.getElementById('stars');
+    const starsCount = 70;
+    
+    for (let i = 0; i < starsCount; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      const size = Math.random() * 3 + 1;
+      star.style.width = `${size}px`;
+      star.style.height = `${size}px`;
+      star.style.left = `${Math.random() * 100}%`;
+      star.style.top = `${Math.random() * 100}%`;
+      star.style.animationDelay = `${Math.random() * 5}s`;
+      star.style.animationDuration = `${Math.random() * 3 + 3}s`;
+      starsContainer.appendChild(star);
+    }
+
+    // Ultra-smooth card rotation
+    const card = document.getElementById('card');
+    const container = document.getElementById('container');
+    
+    let isDragging = false;
+    let lastX = 0;
+    let lastY = 0;
+    let rotationX = 0;
+    let rotationY = 0;
+    let targetX = 0;
+    let targetY = 0;
+    let animFrame;
+
+    const sensitivity = 0.4;
+    const smoothness = 0.15;
+
+    function updateRotation() {
+      rotationX += (targetX - rotationX) * smoothness;
+      rotationY += (targetY - rotationY) * smoothness;
+      
+      card.style.transform = `rotate3d(1, 0, 0, ${rotationY}deg) rotate3d(0, 1, 0, ${rotationX}deg)`;
+      
+      animFrame = requestAnimationFrame(updateRotation);
+    }
+
+    function stopAnimation() {
+      cancelAnimationFrame(animFrame);
+    }
+
+    function startDrag(e) {
+      isDragging = true;
+      lastX = e.clientX || e.touches[0].clientX;
+      lastY = e.clientY || e.touches[0].clientY;
+      container.style.cursor = 'grabbing';
+      updateRotation();
+    }
+
+    function moveDrag(e) {
+      if (!isDragging) return;
+      
+      const currentX = e.clientX || e.touches[0].clientX;
+      const currentY = e.clientY || e.touches[0].clientY;
+      
+      targetX += (currentX - lastX) * sensitivity;
+      targetY -= (currentY - lastY) * sensitivity;
+      
+      lastX = currentX;
+      lastY = currentY;
+      
+      if (e.preventDefault) e.preventDefault();
+    }
+
+    function endDrag() {
+      isDragging = false;
+      container.style.cursor = 'grab';
+      setTimeout(stopAnimation, 1000);
+    }
+
+    // Event listeners for card rotation
+    container.addEventListener('mousedown', startDrag);
+    document.addEventListener('mousemove', moveDrag);
+    document.addEventListener('mouseup', endDrag);
+    
+    container.addEventListener('touchstart', startDrag, { passive: false });
+    container.addEventListener('touchmove', moveDrag, { passive: false });
+    container.addEventListener('touchend', endDrag);
+    
+    // Mobile experience
+    document.addEventListener('touchstart', function() {}, { passive: true });
+
+    // Enhanced button interaction
+    const nextPageBtn = document.getElementById('nextPageBtn');
+    
+    // Touch/click effects
+    nextPageBtn.addEventListener('mousedown', function(e) {
+      this.style.animation = 'none';
+      this.style.transform = 'scale(0.95)';
+    });
+    
+    nextPageBtn.addEventListener('mouseup', function() {
+      this.style.transform = 'scale(1)';
+      setTimeout(() => {
+        this.style.animation = 'pulse 2s infinite';
+      }, 1000);
+    });
+    
+    nextPageBtn.addEventListener('touchstart', function(e) {
+      this.style.animation = 'none';
+      this.style.transform = 'scale(0.95)';
+    }, { passive: false });
+    
+    nextPageBtn.addEventListener('touchend', function() {
+      this.style.transform = 'scale(1)';
+      setTimeout(() => {
+        this.style.animation = 'pulse 2s infinite';
+      }, 1000);
+    });
+    
+    nextPageBtn.addEventListener('mouseleave', function() {
+      this.style.transform = 'scale(1)';
+      this.style.animation = 'pulse 2s infinite';
+    });
+  </script>
+</body>
+</html>
