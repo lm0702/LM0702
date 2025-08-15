@@ -1,66 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script>
+<head>
+	<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-EWFYX4YZCS"></script>
+<script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
+  function gtag(){ dataLayer.push(arguments); }
   gtag('js', new Date());
-  gtag('config', 'G-EWFYX4YZCS'); // Your existing config
+  gtag('config', 'G-EWFYX4YZCS');
 
-  // ===== COMPREHENSIVE ACTIVITY TRACKING =====
-  // 1. Track all clicks
-  document.addEventListener('click', (e) => {
-    const target = e.target.closest('button, a, input, [data-track]') || e.target;
-    gtag('event', 'click', {
-      'element_type': target.tagName,
-      'element_id': target.id || 'none',
-      'element_class': target.className || 'none',
-      'element_content': target.textContent?.trim()?.slice(0, 100) || 'none',
-      'page_section': target.closest('[data-section]')?.dataset.section || 'global'
-    });
-  });
+  document.addEventListener('DOMContentLoaded', () => {
 
-  // 2. Track form interactions
-  document.querySelectorAll('input, textarea, select').forEach(el => {
-    el.addEventListener('change', () => {
-      gtag('event', 'form_interaction', {
-        'element_type': el.tagName,
-        'element_name': el.name || 'none',
-        'value_length': el.value.length
+    // 1️⃣ Track ALL clicks (buttons, links, inputs, custom data-track)
+    document.addEventListener('click', (e) => {
+      const target = e.target.closest('button, a, input, [data-track]') || e.target;
+      gtag('event', 'click', {
+        element_type: target.tagName,
+        element_id: target.id || 'none',
+        element_class: target.className?.toString() || 'none',
+        element_content: target.textContent?.trim()?.slice(0, 100) || 'none',
+        page_section: target.closest('[data-section]')?.dataset.section || 'global'
       });
     });
-  });
 
-  // 3. Track page visibility changes (tab switches)
-  document.addEventListener('visibilitychange', () => {
-    gtag('event', 'visibility_change', {
-      'is_visible': !document.hidden,
-      'duration': performance.now()
+    // 2️⃣ Track form field changes
+    document.querySelectorAll('input, textarea, select').forEach(el => {
+      el.addEventListener('change', () => {
+        gtag('event', 'form_interaction', {
+          element_type: el.tagName,
+          element_name: el.name || 'none',
+          value_length: el.value?.length || 0
+        });
+      });
     });
-  });
 
-  // 4. Track scrolling (every 25% of page height)
-  let lastScrollReport = 0;
-  window.addEventListener('scroll', () => {
-    const scrollPercent = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
-    if (Math.abs(scrollPercent - lastScrollReport) >= 25) {
-      gtag('event', 'scroll_depth', {
-        'scroll_percent': scrollPercent
+    // 3️⃣ Track page visibility (tab changes)
+    document.addEventListener('visibilitychange', () => {
+      gtag('event', 'visibility_change', {
+        is_visible: !document.hidden,
+        timestamp: Date.now()
       });
-      lastScrollReport = scrollPercent;
-    }
-  });
+    });
 
-  // 5. Track terminal commands (specific to your app)
-  const originalConsole = console.log;
-  console.log = function(message) {
-    if (typeof message === 'string' && message.startsWith('>')) {
-      gtag('event', 'terminal_command', {
-        'command': message.slice(0, 200)
+    // 4️⃣ Track scroll depth at 25%, 50%, 75%, 100%
+    let milestones = [25, 50, 75, 100];
+    let reached = [];
+    window.addEventListener('scroll', () => {
+      const scrollPercent = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+      milestones.forEach(m => {
+        if (scrollPercent >= m && !reached.includes(m)) {
+          gtag('event', 'scroll_depth', { scroll_percent: m });
+          reached.push(m);
+        }
       });
-    }
-    originalConsole.apply(console, arguments);
-  };
-		</script>
+    });
+
+    // 5️⃣ Track terminal commands starting with ">"
+    const originalConsoleLog = console.log;
+    console.log = function(message) {
+      if (typeof message === 'string' && message.trim().startsWith('>')) {
+        gtag('event', 'terminal_command', {
+          command: message.slice(0, 200)
+        });
+      }
+      originalConsoleLog.apply(console, arguments);
+    };
+
+  });
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LM0702</title>
