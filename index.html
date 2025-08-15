@@ -1,14 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EWFYX4YZCS"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-EWFYX4YZCS');
-  </script>
+<head><script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-EWFYX4YZCS'); // Your existing config
+
+  // ===== COMPREHENSIVE ACTIVITY TRACKING =====
+  // 1. Track all clicks
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('button, a, input, [data-track]') || e.target;
+    gtag('event', 'click', {
+      'element_type': target.tagName,
+      'element_id': target.id || 'none',
+      'element_class': target.className || 'none',
+      'element_content': target.textContent?.trim()?.slice(0, 100) || 'none',
+      'page_section': target.closest('[data-section]')?.dataset.section || 'global'
+    });
+  });
+
+  // 2. Track form interactions
+  document.querySelectorAll('input, textarea, select').forEach(el => {
+    el.addEventListener('change', () => {
+      gtag('event', 'form_interaction', {
+        'element_type': el.tagName,
+        'element_name': el.name || 'none',
+        'value_length': el.value.length
+      });
+    });
+  });
+
+  // 3. Track page visibility changes (tab switches)
+  document.addEventListener('visibilitychange', () => {
+    gtag('event', 'visibility_change', {
+      'is_visible': !document.hidden,
+      'duration': performance.now()
+    });
+  });
+
+  // 4. Track scrolling (every 25% of page height)
+  let lastScrollReport = 0;
+  window.addEventListener('scroll', () => {
+    const scrollPercent = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+    if (Math.abs(scrollPercent - lastScrollReport) >= 25) {
+      gtag('event', 'scroll_depth', {
+        'scroll_percent': scrollPercent
+      });
+      lastScrollReport = scrollPercent;
+    }
+  });
+
+  // 5. Track terminal commands (specific to your app)
+  const originalConsole = console.log;
+  console.log = function(message) {
+    if (typeof message === 'string' && message.startsWith('>')) {
+      gtag('event', 'terminal_command', {
+        'command': message.slice(0, 200)
+      });
+    }
+    originalConsole.apply(console, arguments);
+  };
+		</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LM0702</title>
