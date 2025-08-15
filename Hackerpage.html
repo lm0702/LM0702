@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EWFYX4YZCS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EWFYX4YZCS');
+  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LM0702 Cyber Scan</title>
+    <link rel="icon" href="LM0702.png" type="image/png">
+    <style>
+        :root {
+            --neon-green: #00f0a8;
+            --neon-pink: #ff00aa;
+            --neon-blue: #00aaff;
+            --dark-bg: rgba(0, 0, 0, 0.85);
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+            outline: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: white;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            height: 100vh;
+            touch-action: manipulation;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('Hackbg.jpg') center/cover no-repeat;
+            z-index: -2;
+            opacity: 0.8;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        header {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(2rem, 7vw, 4rem);
+            font-weight: 900;
+            letter-spacing: 8px;
+            color: var(--neon-green);
+            text-shadow: 
+                0 0 10px var(--neon-green),
+                0 0 20px var(--neon-green),
+                0 0 40px var(--neon-green);
+            z-index: 10;
+            padding: 0.5rem 2rem;
+            background: var(--dark-bg);
+            border: 1px solid var(--neon-green);
+            border-radius: 50px;
+            box-shadow: 0 0 20px rgba(0, 240, 168, 0.3);
+            white-space: nowrap;
+        }
+
+        .password-bubble {
+            position: fixed;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            background: var(--dark-bg);
+            border: 1px solid var(--neon-green);
+            border-radius: 50px;
+            font-size: clamp(1rem, 2.5vw, 1.5rem);
+            color: var(--neon-green);
+            text-shadow: 0 0 10px var(--neon-green);
+            animation: glowPulse 1.5s infinite alternate;
+            z-index: 10;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .password-bubble:hover, .password-bubble:active {
+            background: rgba(0, 240, 168, 0.1);
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 0 30px var(--neon-green);
+        }
+
+        @keyframes glowPulse {
+            from { box-shadow: 0 0 12px var(--neon-green); }
+            to { box-shadow: 0 0 25px var(--neon-green); }
+        }
+
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            padding: 12px 0;
+            text-align: center;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            color: rgba(255, 255, 255, 0.85);
+            font-size: clamp(0.7rem, 2vw, 0.9rem);
+            border-top: 1px solid rgba(0, 240, 168, 0.2);
+            text-shadow: 0 0 5px var(--neon-green);
+            z-index: 10;
+        }
+
+        .center-image {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            max-width: min(40vw, 400px);
+            max-height: min(40vh, 400px);
+            animation: float 3s ease-in-out infinite, glow 2s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 10px var(--neon-green)) drop-shadow(0 0 20px var(--neon-green));
+        }
+
+        @keyframes float {
+            0% { transform: translate(-50%, -50%) translateY(0); }
+            50% { transform: translate(-50%, -50%) translateY(-15px); }
+            100% { transform: translate(-50%, -50%) translateY(0); }
+        }
+
+        @keyframes glow {
+            0% { filter: drop-shadow(0 0 10px var(--neon-green)) drop-shadow(0 0 20px var(--neon-green)); }
+            100% { filter: drop-shadow(0 0 20px var(--neon-green)) drop-shadow(0 0 40px var(--neon-green)); }
+        }
+
+        /* Terminal Window */
+        .terminal-window {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            background: rgba(0, 5, 10, 0.95);
+            border: 2px solid var(--neon-green);
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(0, 240, 168, 0.5);
+            z-index: 20;
+            display: none;
+            overflow: hidden;
+            color: var(--neon-green);
+        }
+
+        .terminal-header {
+            padding: 10px 15px;
+            background: linear-gradient(to right, rgba(0, 240, 168, 0.2), rgba(0, 170, 255, 0.2));
+            border-bottom: 1px solid var(--neon-green);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .terminal-close {
+            color: var(--neon-green);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+
+        .terminal-close:hover {
+            transform: scale(1.2);
+            text-shadow: 0 0 10px var(--neon-green);
+        }
+
+        .terminal-body {
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            line-height: 1.5;
+        }
+
+        .terminal-input {
+            display: flex;
+            padding: 10px 15px;
+            border-top: 1px solid rgba(0, 240, 168, 0.3);
+            align-items: center;
+        }
+
+        .terminal-prompt {
+            color: var(--neon-green);
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+
+        .terminal-input-field {
+            background: transparent;
+            border: none;
+            color: var(--neon-green);
+            font-family: 'Courier New', monospace;
+            width: 100%;
+            caret-color: var(--neon-green);
+            font-size: 1rem;
+        }
+
+        /* Social Media Page */
+        .social-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 30;
+        }
+
+        .social-header {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            font-weight: 900;
+            letter-spacing: 5px;
+            color: var(--neon-green);
+            text-shadow: 
+                0 0 10px var(--neon-green),
+                0 0 20px var(--neon-green);
+            z-index: 31;
+            padding: 0.5rem 1.5rem;
+            background: var(--dark-bg);
+            border: 1px solid var(--neon-green);
+            border-radius: 50px;
+            box-shadow: 0 0 20px rgba(0, 240, 168, 0.3);
+            white-space: nowrap;
+        }
+
+        .social-icons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            margin-top: 100px;
+            z-index: 31;
+        }
+
+        .social-icon {
+            color: white;
+            font-size: 1.8rem;
+            text-decoration: none;
+            padding: 15px 40px;
+            border: 2px solid var(--neon-green);
+            border-radius: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            width: 250px;
+            justify-content: center;
+            text-shadow: 0 0 5px var(--neon-green);
+            box-shadow: 0 0 15px rgba(0, 240, 168, 0.3);
+        }
+
+        .social-icon:hover {
+            background: rgba(0, 240, 168, 0.2);
+            transform: scale(1.05);
+            box-shadow: 0 0 25px var(--neon-green);
+        }
+
+        .social-icon i {
+            font-size: 1.5em;
+            color: var(--neon-green);
+        }
+
+        .social-title {
+            font-size: 1.2em;
+        }
+
+        .social-footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            padding: 12px 0;
+            text-align: center;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            color: rgba(255, 255, 255, 0.85);
+            font-size: clamp(0.7rem, 2vw, 0.9rem);
+            border-top: 1px solid rgba(0, 240, 168, 0.2);
+            text-shadow: 0 0 5px var(--neon-green);
+            z-index: 31;
+        }
+
+        /* Hacking animation for social page */
+        #social-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 29;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .center-image {
+                max-width: 60vw;
+                max-height: 60vh;
+            }
+            .terminal-body {
+                height: 150px;
+            }
+            .social-icon {
+                width: 200px;
+                padding: 12px 25px;
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                letter-spacing: 4px;
+                padding: 0.3rem 1rem;
+            }
+            .center-image {
+                max-width: 80vw;
+                max-height: 80vh;
+            }
+            .terminal-body {
+                height: 120px;
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+            .terminal-input {
+                padding: 8px 10px;
+            }
+            .social-icon {
+                width: 180px;
+                padding: 10px 20px;
+                font-size: 1.2rem;
+                gap: 10px;
+            }
+            .social-header {
+                font-size: 1.3rem;
+                padding: 0.3rem 1rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes shake {
+            0%, 100% { transform: translate(-50%, -50%); }
+            10%, 30%, 50%, 70%, 90% { transform: translate(-51%, -50%); }
+            20%, 40%, 60%, 80% { transform: translate(-49%, -50%); }
+        }
+
+        @keyframes socialFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <!-- Font Awesome for social icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Main Page Content -->
+    <div id="main-content">
+        <header>LM0702</header>
+        <canvas id="hacking-bg"></canvas>
+        <img src="Centerpic.png" alt="Cyber Core" class="center-image" id="center-image">
+        <div class="password-bubble" id="password-button">ENTER ACCESS CODE</div>
+        <footer>&copy; <span id="year"></span> LM0702 CYBER SYSTEMS. ALL RIGHTS RESERVED.</footer>
+
+        <!-- Terminal Window -->
+        <div class="terminal-window" id="terminal">
+            <div class="terminal-header">
+                <div>SECURE TERMINAL</div>
+                <div class="terminal-close" id="terminal-close">✕</div>
+            </div>
+            <div class="terminal-body" id="terminal-output">
+                > INITIALIZING SECURITY PROTOCOL...<br>
+                > BIOMETRIC SCAN COMPLETE<br>
+                > ENTER ACCESS CODE BELOW<br><br>
+                > WARNING: UNAUTHORIZED ACCESS ATTEMPTS WILL BE LOGGED<br>
+                >
+            </div>
+            <div class="terminal-input">
+                <span class="terminal-prompt">></span>
+                <input type="password" class="terminal-input-field" id="terminal-input" autocomplete="off">
+            </div>
+        </div>
+    </div>
+
+    <!-- Social Media Page -->
+    <div class="social-container" id="social-container">
+        <canvas id="social-canvas"></canvas>
+        <div class="social-header">CONNECT WITH ME</div>
+        <div class="social-icons">
+            <a href="https://www.instagram.com/lm0702_" class="social-icon" target="_blank">
+                <i class="fab fa-instagram"></i>
+                <span class="social-title">Instagram</span>
+            </a>
+            <a href="https://www.tiktok.com/lm0702_" class="social-icon" target="_blank">
+                <i class="fab fa-tiktok"></i>
+                <span class="social-title">TikTok</span>
+            </a>
+            <a href="https://discord.gg/j87ApTjvpm" class="social-icon" target="_blank">
+                <i class="fab fa-discord"></i>
+                <span class="social-title">Discord</span>
+            </a>
+        </div>
+        <div class="social-footer">&copy; <span id="social-year"></span> LM0702 CYBER SYSTEMS. ALL RIGHTS RESERVED.</div>
+    </div>
+
+    <script>
+        // Set current year
+        const currentYear = new Date().getFullYear();
+        document.getElementById('year').textContent = currentYear;
+        document.getElementById('social-year').textContent = currentYear;
+
+        // Matrix background effect for main page
+        const canvas = document.getElementById('hacking-bg');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = "01#@$%&*ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let points = [];
+
+        for (let i = 0; i < 200; i++) {
+            points.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                char: chars.charAt(Math.floor(Math.random() * chars.length)),
+                opacity: Math.random(),
+                size: Math.random() * 20 + 10
+            });
+        }
+
+        function drawMatrix() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const scanY = (Date.now() / 5) % canvas.height;
+            ctx.fillStyle = "rgba(0, 240, 168, 0.1)";
+            ctx.fillRect(0, scanY, canvas.width, 3);
+
+            points.forEach(p => {
+                if (Math.random() < 0.05) {
+                    p.char = chars.charAt(Math.floor(Math.random() * chars.length));
+                    p.opacity = Math.random();
+                }
+                ctx.font = `${p.size}px monospace`;
+                ctx.fillStyle = `rgba(0, 240, 168, ${p.opacity})`;
+                ctx.shadowColor = "#00f0a8";
+                ctx.shadowBlur = 6;
+                ctx.fillText(p.char, p.x, p.y);
+            });
+        }
+
+        // Matrix background effect for social page
+        const socialCanvas = document.getElementById('social-canvas');
+        const socialCtx = socialCanvas.getContext('2d');
+        socialCanvas.width = window.innerWidth;
+        socialCanvas.height = window.innerHeight;
+
+        const socialChars = "01#@$%&*ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let socialPoints = [];
+
+        for (let i = 0; i < 150; i++) {
+            socialPoints.push({
+                x: Math.random() * socialCanvas.width,
+                y: Math.random() * socialCanvas.height,
+                char: socialChars.charAt(Math.floor(Math.random() * socialChars.length)),
+                opacity: Math.random() * 0.5,
+                size: Math.random() * 15 + 8
+            });
+        }
+
+        function drawSocialMatrix() {
+            socialCtx.clearRect(0, 0, socialCanvas.width, socialCanvas.height);
+            const scanY = (Date.now() / 7) % socialCanvas.height;
+            socialCtx.fillStyle = "rgba(0, 240, 168, 0.08)";
+            socialCtx.fillRect(0, scanY, socialCanvas.width, 2);
+
+            socialPoints.forEach(p => {
+                if (Math.random() < 0.03) {
+                    p.char = socialChars.charAt(Math.floor(Math.random() * socialChars.length));
+                    p.opacity = Math.random() * 0.5;
+                }
+                socialCtx.font = `${p.size}px monospace`;
+                socialCtx.fillStyle = `rgba(0, 240, 168, ${p.opacity})`;
+                socialCtx.shadowColor = "#00f0a8";
+                socialCtx.shadowBlur = 4;
+                socialCtx.fillText(p.char, p.x, p.y);
+            });
+        }
+
+        // Animation loops
+        function animate() {
+            drawMatrix();
+            requestAnimationFrame(animate);
+        }
+
+        function animateSocial() {
+            drawSocialMatrix();
+            requestAnimationFrame(animateSocial);
+        }
+
+        animate();
+
+        // DOM elements
+        const passwordButton = document.getElementById('password-button');
+        const terminal = document.getElementById('terminal');
+        const terminalClose = document.getElementById('terminal-close');
+        const terminalInput = document.getElementById('terminal-input');
+        const terminalOutput = document.getElementById('terminal-output');
+        const mainContent = document.getElementById('main-content');
+        const socialContainer = document.getElementById('social-container');
+
+        // Error messages for wrong codes
+        const errorMessages = [
+            "> ERROR: INVALID CREDENTIALS",
+            "> ACCESS DENIED: UNAUTHORIZED USER",
+            "> SECURITY ALERT: INCORRECT CODE",
+            "> WARNING: INTRUSION DETECTED",
+            "> SYSTEM LOCKOUT IMMINENT"
+        ];
+
+        // Event listeners
+        passwordButton.addEventListener('click', showTerminal);
+        terminalClose.addEventListener('click', hideTerminal);
+        terminalInput.addEventListener('keypress', handleTerminalInput);
+
+        // Terminal functions
+        function showTerminal() {
+            terminal.style.display = 'block';
+            terminalInput.focus();
+        }
+
+        function hideTerminal() {
+            terminal.style.display = 'none';
+            terminalInput.value = '';
+        }
+
+        function handleTerminalInput(e) {
+            if (e.key === 'Enter') {
+                if (terminalInput.value.toUpperCase() === "LM0702") {
+                    // Correct code animation
+                    terminalOutput.innerHTML += '> CODE VERIFIED<br>';
+                    terminalOutput.innerHTML += '> ACCESS GRANTED<br>';
+                    terminalOutput.innerHTML += '> LOADING SOCIAL CONNECTIONS...<br>';
+                    terminalInput.value = '';
+                    
+                    // Transition to social page
+                    setTimeout(() => {
+                        mainContent.style.display = 'none';
+                        socialContainer.style.display = 'flex';
+                        animateSocial(); // Start social page animation
+                        
+                        // Animate social icons in
+                        const socialIcons = document.querySelectorAll('.social-icon');
+                        socialIcons.forEach((icon, index) => {
+                            icon.style.animation = `socialFadeIn 0.5s ${index * 0.2}s forwards`;
+                            icon.style.opacity = '0';
+                        });
+                    }, 1500);
+                } else { if (navigator.vibrate) {
+    navigator.vibrate([200, 100, 200]); // Vibrate pattern: 200ms on, 100ms off, 200ms on
+}
+                    // Wrong code animation
+                    const randomError = errorMessages[Math.floor(Math.random() * errorMessages.length)];
+                    terminalOutput.innerHTML += '> ' + '*'.repeat(terminalInput.value.length) + '<br>';
+                    terminalOutput.innerHTML += randomError + '<br><br>> ';
+                    terminalInput.value = '';
+                    
+                    // Shake animation for wrong code
+                    terminal.style.animation = 'shake 0.5s';
+                    setTimeout(() => {
+                        terminal.style.animation = '';
+                    }, 500);
+                }
+            }
+        }
+
+        // Window resize handler
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            socialCanvas.width = window.innerWidth;
+            socialCanvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
